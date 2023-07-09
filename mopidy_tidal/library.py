@@ -290,7 +290,7 @@ class TidalLibraryProvider(backend.LibraryProvider):
 
                 try:
                     data = getattr(self, cache_name)[uri]
-                    cache_miss = not bool(data)
+                    cache_miss = not bool(data) or data.tracks[0] == mopidy_tidal.utils.mock_track
                 except (AttributeError, KeyError):
                     pass
 
