@@ -72,8 +72,17 @@ class ImagesGetter:
             item_type = "album"
             item_id = parts[3]
             uri = ":".join([parts[0], "album", parts[3]])
-        else:
+        elif item_type == "album":
             item_id = parts[2]
+        elif item_type == "playlist":
+            item_id = parts[2]
+        elif item_type == "artist":
+            item_id = parts[2]
+        elif item_type == "mix":
+            item_id = parts[2]
+        else:
+            # uri has no image associated to it (eg. tidal:mood tidal:genres etc.)
+            return []
 
         if uri in self._image_cache:
             # Cache hit
@@ -193,6 +202,18 @@ class TidalLibraryProvider(backend.LibraryProvider):
             return ref_models_mappers.create_tracks(
                 get_items(session.user.favorites.tracks)
             )
+        elif uri == "tidal:home":
+            return ref_models_mappers.create_mixed_directory(
+                [m for m in session.home()]
+            )
+        elif uri == "tidal:for_you":
+            return ref_models_mappers.create_mixed_directory(
+                [m for m in session.for_you()]
+            )
+        elif uri == "tidal:explore":
+            return ref_models_mappers.create_mixed_directory(
+                [m for m in session.explore()]
+            )
         elif uri == "tidal:moods":
             return ref_models_mappers.create_moods(session.moods())
         elif uri == "tidal:mixes":
@@ -201,7 +222,6 @@ class TidalLibraryProvider(backend.LibraryProvider):
             return ref_models_mappers.create_genres(session.genre.get_genres())
 
         # details
-
         parts = uri.split(":")
         nr_of_parts = len(parts)
 
@@ -241,6 +261,9 @@ class TidalLibraryProvider(backend.LibraryProvider):
                 self._get_mix_tracks(session, parts[2])
             )
 
+        if nr_of_parts == 3 and parts[1] == "page":
+            return ref_models_mappers.create_mixed_directory(session.page.get(parts[2]))
+
         logger.debug("Unknown uri for browse request: %s", uri)
         return []
 
@@ -265,8 +288,7 @@ class TidalLibraryProvider(backend.LibraryProvider):
         with ThreadPoolExecutor(4, thread_name_prefix="mopidy-tidal-images-") as pool:
             pool_res = pool.map(images_getter, uris)
 
-        images = {uri: item_images for uri, item_images in pool_res}
-
+        images = {uri: item_images for uri, item_images in pool_res if item_images}
         images_getter.cache_update(images)
         return images
 

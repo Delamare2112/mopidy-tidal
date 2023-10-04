@@ -7,7 +7,7 @@ from importlib import metadata
 
 from mopidy import config, ext
 
-__version__ = metadata.version("mopidy_tidal")
+__version__ = "0.3.4"
 
 # TODO: If you need to log, use loggers named after the current Python module
 logger = logging.getLogger(__name__)
@@ -27,7 +27,9 @@ class Extension(ext.Extension):
 
     def get_config_schema(self):
         schema = super().get_config_schema()
-        schema["quality"] = config.String(choices=["LOSSLESS", "HIGH", "LOW"])
+        schema["quality"] = config.String(
+            choices=["HI_RES_LOSSLESS", "LOSSLESS", "HIGH", "LOW"]
+        )
         schema["client_id"] = config.String(optional=True)
         schema["client_secret"] = config.String(optional=True)
         schema["playlist_cache_refresh_secs"] = config.Integer(optional=True)
