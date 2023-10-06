@@ -14,6 +14,7 @@ from mopidy_tidal.lru_cache import LruCache
 from mopidy_tidal.playlists import PlaylistMetadataCache
 from mopidy_tidal.utils import apply_watermark
 from mopidy_tidal.workers import get_items
+from mopidy_tidal.utils import mock_track
 
 if TYPE_CHECKING:  # pragma: no cover
     from mopidy_tidal.backend import TidalBackend
@@ -312,7 +313,7 @@ class TidalLibraryProvider(backend.LibraryProvider):
 
                 try:
                     data = getattr(self, cache_name)[uri]
-                    cache_miss = not bool(data) or data.tracks[0] == mopidy_tidal.utils.mock_track
+                    cache_miss = not bool(data) or data.tracks[0] == mock_track
                 except (AttributeError, KeyError):
                     pass
 
